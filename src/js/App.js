@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import { addUser } from "./actions/userActions";
-import { beginCallSetup, hangUp } from "./actions/conferenceActions";
+import { beginCallSetup, endConnection } from "./actions/conferenceActions";
 import LocalVideo from "./components/LocalVideo";
 import RemoteVideo from "./components/RemoteVideo";
 
@@ -22,7 +22,7 @@ function App() {
     };
 
     const handleHangUp = () => {
-        dispatch(hangUp());
+        dispatch(endConnection());
     };
 
     return (

@@ -3,8 +3,10 @@ const INITIAL_STATE = {
         startCallDisabled: false,
         hangUpCallDisabled: true,
     },
-    remoteStream: null,
     localStream: null,
+    remoteStream: null,
+    localPeerConnection: null,
+    remotePeerConnection: null,
 };
 
 export default function reducer(state = INITIAL_STATE, action) {
@@ -33,6 +35,13 @@ export default function reducer(state = INITIAL_STATE, action) {
             return {
                 ...state,
                 localStream: action.payload,
+            };
+        }
+        case 'SAVE_PEER_CONNECTIONS': {
+            return {
+                ...state,
+                localPeerConnection: action.payload.localPeerConnection,
+                remotePeerConnection: action.payload.remotePeerConnection,
             };
         }
         default:

@@ -57,6 +57,11 @@ export function beginCallSetup() {
         const localPeerConnection = new RTCPeerConnection(null);
         const remotePeerConnection = new RTCPeerConnection(null);
 
+        dispatch(savePeerConnections({
+            localPeerConnection,
+            remotePeerConnection,
+        }));
+
         // local peer conn. config.
         localPeerConnection.addEventListener('icecandidate', handleConnection.bind(null, localPeerConnection, remotePeerConnection));
         localPeerConnection.addEventListener(
@@ -80,16 +85,33 @@ export function beginCallSetup() {
     };
 }
 
+function savePeerConnections(peerConnections) {
+    return {
+        type: 'SAVE_PEER_CONNECTIONS',
+        payload: peerConnections,
+    };
+}
+
 export function startCall() {
     return {
         type: 'START_CALL',
     }
 }
 
-export function hangUp() {
+function hangUp() {
     return {
         type: 'HANG_UP',
     }
+}
+
+export function endConnection() {
+    return (dispatch, getState) => {
+        const { localPeerConnection, remotePeerConnection } = getState().conference;
+        localPeerConnection.close();
+        remotePeerConnection.close();
+
+        dispatch(hangUp());
+    };
 }
 
 export function saveRemoteStream(stream) {
