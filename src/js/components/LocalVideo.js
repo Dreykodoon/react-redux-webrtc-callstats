@@ -6,7 +6,7 @@ const MEDIA_STREAM_CONSTRAINTS = {
     video: true,
 };
 
-function Video() {
+function LocalVideo() {
     const videoRef = useRef(null);
 
     const gotLocalMediaStream = (mediaStream) => {
@@ -23,8 +23,10 @@ function Video() {
     });
 
     return (
-        <video ref={videoRef} autoPlay playsInline />
+        <div>
+            <video ref={videoRef} autoPlay playsInline />
+        </div>
     );
 }
 
-export default Video;
+export default LocalVideo;
