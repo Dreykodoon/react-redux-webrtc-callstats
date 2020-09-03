@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import { addUser } from "./actions/userActions";
+import Video from "./components/Video";
 
 
 function App() {
@@ -14,9 +15,10 @@ function App() {
 
     return (
         <div>
-          <p>Hello, World!</p>
-          {users}
-          <button onClick={onClickAddUser}>Add user</button>
+            <p>Hello, World!</p>
+            {users}
+            <button onClick={onClickAddUser}>Add user</button>
+            <Video />
         </div>
     );
 }
