@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import { addUser } from "./actions/userActions";
-import { startCall, hangUp } from "./actions/conferenceControlsActions";
+import { beginCallSetup, hangUp } from "./actions/conferenceActions";
 import LocalVideo from "./components/LocalVideo";
 import RemoteVideo from "./components/RemoteVideo";
 
@@ -10,7 +10,7 @@ function App() {
     const dispatch = useDispatch();
 
     const users = useSelector(state => state.user.users);
-    const conferenceControls = useSelector(state => state.conferenceControls);
+    const conferenceControls = useSelector(state => state.conference.controls);
     const { startCallDisabled, hangUpCallDisabled } = conferenceControls;
 
     const handleAddUser = () => {
@@ -18,7 +18,7 @@ function App() {
     };
 
     const handleStartCall = () => {
-        dispatch(startCall());
+        dispatch(beginCallSetup());
     };
 
     const handleHangUp = () => {

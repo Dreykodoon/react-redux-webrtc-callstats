@@ -1,9 +1,9 @@
 import {combineReducers} from 'redux';
 
 import user from './userReducer';
-import conferenceControls from "./conferenceControlsReducer";
+import conference from "./conferenceReducer";
 
 export default combineReducers({
     user,
-    conferenceControls,
+    conference,
 });

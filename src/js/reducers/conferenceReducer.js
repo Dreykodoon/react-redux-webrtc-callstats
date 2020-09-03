@@ -1,6 +1,8 @@
 const INITIAL_STATE = {
-    startCallDisabled: false,
-    hangUpCallDisabled: true,
+    controls: {
+        startCallDisabled: false,
+        hangUpCallDisabled: true,
+    }
 };
 
 export default function reducer(state = INITIAL_STATE, action) {
@@ -8,8 +10,11 @@ export default function reducer(state = INITIAL_STATE, action) {
         case 'START_CALL': {
             return {
                 ...state,
-                startCallDisabled: true,
-                hangUpCallDisabled: false,
+                controls: {
+                    ...state.controls,
+                    startCallDisabled: true,
+                    hangUpCallDisabled: false,
+                },
             };
 
         }
