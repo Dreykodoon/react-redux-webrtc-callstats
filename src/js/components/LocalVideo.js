@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import { useDispatch } from "react-redux";
+import { saveLocalStream } from "../actions/conferenceActions";
 import '../../css/Video.css';
 
 
@@ -7,19 +9,22 @@ const MEDIA_STREAM_CONSTRAINTS = {
 };
 
 function LocalVideo() {
+    const dispatch = useDispatch();
+
     const videoRef = useRef(null);
 
-    const gotLocalMediaStream = (mediaStream) => {
+    const gotMediaStream = (mediaStream) => {
         videoRef.current.srcObject = mediaStream;
+        dispatch(saveLocalStream(mediaStream));
     };
 
-    const handleLocalMediaStreamError = (error) => {
+    const handleMediaStreamError = (error) => {
         console.log('navigator.getUserMedia error: ', error);
     };
 
     useEffect(() => {
         navigator.mediaDevices.getUserMedia(MEDIA_STREAM_CONSTRAINTS)
-            .then(gotLocalMediaStream).catch(handleLocalMediaStreamError);
+            .then(gotMediaStream).catch(handleMediaStreamError);
     });
 
     return (

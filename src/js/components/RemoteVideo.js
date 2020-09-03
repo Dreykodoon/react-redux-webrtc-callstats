@@ -1,26 +1,18 @@
 import React, { useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import '../../css/Video.css';
 
-
-const MEDIA_STREAM_CONSTRAINTS = {
-    video: true,
-};
 
 function RemoteVideo() {
     const videoRef = useRef(null);
 
-    const gotLocalMediaStream = (mediaStream) => {
-        videoRef.current.srcObject = mediaStream;
-    };
-
-    const handleLocalMediaStreamError = (error) => {
-        console.log('navigator.getUserMedia error: ', error);
-    };
+    const remoteMediaStream = useSelector(state => state.conference.remoteStream);
 
     useEffect(() => {
-        navigator.mediaDevices.getUserMedia(MEDIA_STREAM_CONSTRAINTS)
-            .then(gotLocalMediaStream).catch(handleLocalMediaStreamError);
-    });
+        if (remoteMediaStream !== null) {
+            videoRef.current.srcObject = remoteMediaStream;
+        }
+    }, [remoteMediaStream]);
 
     return (
         <div>

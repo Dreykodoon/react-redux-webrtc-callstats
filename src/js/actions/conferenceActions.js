@@ -17,17 +17,44 @@ function handleConnection(localPeerConnection, remotePeerConnection, event) {
 }
 
 function handleConnectionChange(event) {
+    console.log('ICE state change event: ', event);
+}
 
+function createdOffer(localPeerConnection, remotePeerConnection, description) {
+    localPeerConnection.setLocalDescription(description)
+        .then(() => {}).catch((error) => {
+        console.log(`Failed to create session description: ${error.toString()}.`);
+    });
+
+    remotePeerConnection.setRemoteDescription(description)
+        .then(() => {}).catch((error) => {
+        console.log(`Failed to create session description: ${error.toString()}.`);
+    });
+
+    remotePeerConnection.createAnswer()
+        .then(createdAnswer.bind(null, localPeerConnection, remotePeerConnection)).catch((error) => {
+        console.log('Error creating answer: ', error.toString());
+    });
+}
+
+function createdAnswer(localPeerConnection, remotePeerConnection, description) {
+    remotePeerConnection.setLocalDescription(description)
+        .then(() => {}).catch((error) => {
+        console.log(`Failed to create session description: ${error.toString()}.`);
+    });
+
+    localPeerConnection.setRemoteDescription(description)
+        .then(() => {}).catch((error) => {
+        console.log(`Failed to create session description: ${error.toString()}.`);
+    });
 }
 
 export function beginCallSetup() {
     return (dispatch, getState) => {
-        console.log(getState());
-
         dispatch(startCall());
 
         // Create peer connections and add behavior.
-        /*const localPeerConnection = new RTCPeerConnection(null);
+        const localPeerConnection = new RTCPeerConnection(null);
         const remotePeerConnection = new RTCPeerConnection(null);
 
         // local peer conn. config.
@@ -35,10 +62,21 @@ export function beginCallSetup() {
         localPeerConnection.addEventListener(
             'iceconnectionstatechange', handleConnectionChange);
 
-        remotePeerConnection.addEventListener('icecandidate', handleConnection);
+        remotePeerConnection.addEventListener('icecandidate', handleConnection.bind(null, localPeerConnection, remotePeerConnection));
         remotePeerConnection.addEventListener(
             'iceconnectionstatechange', handleConnectionChange);
-        remotePeerConnection.addEventListener('addstream', gotRemoteMediaStream);*/
+        remotePeerConnection.addEventListener('addstream', (event) => {
+            dispatch(saveRemoteStream(event.stream));
+        });
+
+        // Add local stream to connection and create offer to connect.
+        const localStream = getState().conference.localStream;
+        localPeerConnection.addStream(localStream);
+
+        localPeerConnection.createOffer({ offerToReceiveVideo: 1 })
+            .then(createdOffer.bind(null, localPeerConnection, remotePeerConnection)).catch((error) => {
+            console.log('Error creating offer: ', error.toString());
+        });
     };
 }
 
@@ -52,4 +90,18 @@ export function hangUp() {
     return {
         type: 'HANG_UP',
     }
+}
+
+export function saveRemoteStream(stream) {
+    return {
+        type: 'SAVE_REMOTE_STREAM',
+        payload: stream,
+    };
+}
+
+export function saveLocalStream(stream) {
+    return {
+        type: 'SAVE_LOCAL_STREAM',
+        payload: stream,
+    };
 }
