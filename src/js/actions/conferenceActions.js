@@ -1,3 +1,6 @@
+import socket from "../../socket";
+
+
 async function handleConnection(localPeerConnection, remotePeerConnection, event) {
     const peerConnection = event.target;
     const iceCandidate = event.candidate;
@@ -53,7 +56,7 @@ async function setRemoteDescription(localPeerConnection, remotePeerConnection, d
 
 export function beginCallSetup() {
     return async (dispatch, getState) => {
-        dispatch(startCall());
+        socket.emit('create or join', 'default');
 
         // Create peer connections and add behavior.
         const localPeerConnection = new RTCPeerConnection(null);
@@ -85,6 +88,8 @@ export function beginCallSetup() {
         } catch (error) {
             console.log('Error creating offer: ', error.toString());
         }
+
+        dispatch(startCall());
     };
 }
 

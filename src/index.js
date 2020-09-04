@@ -2,16 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import App from './js/App';
+import store from './store';
 
-import { applyMiddleware, createStore } from 'redux';
-import thunk from 'redux-thunk';
-import reducer from './js/reducers';
-
+// WARNING! needs to be initialized AFTER the store
+// eslint-disable-next-line
+import socket from './socket';
+// needs to be initialized, nothing more
 // eslint-disable-next-line
 import adapter from 'webrtc-adapter';
 
-
-const store = createStore(reducer, applyMiddleware(thunk));
 
 ReactDOM.render(
   <Provider store={store}>
