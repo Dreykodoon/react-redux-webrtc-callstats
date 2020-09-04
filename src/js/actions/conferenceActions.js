@@ -1,4 +1,4 @@
-function handleConnection(localPeerConnection, remotePeerConnection, event) {
+async function handleConnection(localPeerConnection, remotePeerConnection, event) {
     const peerConnection = event.target;
     const iceCandidate = event.candidate;
 
@@ -7,50 +7,52 @@ function handleConnection(localPeerConnection, remotePeerConnection, event) {
         const otherPeer = (peerConnection === localPeerConnection) ?
             remotePeerConnection : localPeerConnection;
 
-        otherPeer.addIceCandidate(newIceCandidate)
-            .then(() => {
-                console.log('addIceCandidate success');
-            }).catch((error) => {
-                console.log('failed to add ICE Candidate:\n', error.toString());
-            });
+        try {
+            await otherPeer.addIceCandidate(newIceCandidate);
+            console.log('addIceCandidate success');
+        } catch(error) {
+            console.log('failed to add ICE Candidate:\n', error.toString());
+        }
     }
 }
 
-function handleConnectionChange(event) {
-    console.log('ICE state change event: ', event);
-}
-
-function createdOffer(localPeerConnection, remotePeerConnection, description) {
-    localPeerConnection.setLocalDescription(description)
-        .then(() => {}).catch((error) => {
+async function setLocalDescription(localPeerConnection, remotePeerConnection, localDescription) {
+    try {
+        await localPeerConnection.setLocalDescription(localDescription);
+    } catch(error) {
         console.log(`Failed to create session description: ${error.toString()}.`);
-    });
+    }
 
-    remotePeerConnection.setRemoteDescription(description)
-        .then(() => {}).catch((error) => {
+    try {
+        await remotePeerConnection.setRemoteDescription(localDescription);
+    } catch (error) {
         console.log(`Failed to create session description: ${error.toString()}.`);
-    });
+    }
 
-    remotePeerConnection.createAnswer()
-        .then(createdAnswer.bind(null, localPeerConnection, remotePeerConnection)).catch((error) => {
+    try {
+        const remoteDescription = await remotePeerConnection.createAnswer();
+        await setRemoteDescription(localPeerConnection, remotePeerConnection, remoteDescription);
+    } catch(error) {
         console.log('Error creating answer: ', error.toString());
-    });
+    }
 }
 
-function createdAnswer(localPeerConnection, remotePeerConnection, description) {
-    remotePeerConnection.setLocalDescription(description)
-        .then(() => {}).catch((error) => {
+async function setRemoteDescription(localPeerConnection, remotePeerConnection, description) {
+    try {
+        await remotePeerConnection.setLocalDescription(description);
+    } catch (error) {
         console.log(`Failed to create session description: ${error.toString()}.`);
-    });
+    }
 
-    localPeerConnection.setRemoteDescription(description)
-        .then(() => {}).catch((error) => {
+    try {
+        await localPeerConnection.setRemoteDescription(description);
+    } catch (error) {
         console.log(`Failed to create session description: ${error.toString()}.`);
-    });
+    }
 }
 
 export function beginCallSetup() {
-    return (dispatch, getState) => {
+    return async (dispatch, getState) => {
         dispatch(startCall());
 
         // Create peer connections and add behavior.
@@ -62,14 +64,13 @@ export function beginCallSetup() {
             remotePeerConnection,
         }));
 
-        // local peer conn. config.
         localPeerConnection.addEventListener('icecandidate', handleConnection.bind(null, localPeerConnection, remotePeerConnection));
         localPeerConnection.addEventListener(
-            'iceconnectionstatechange', handleConnectionChange);
+            'iceconnectionstatechange', event => {console.log('ICE state change event: ', event)});
 
         remotePeerConnection.addEventListener('icecandidate', handleConnection.bind(null, localPeerConnection, remotePeerConnection));
         remotePeerConnection.addEventListener(
-            'iceconnectionstatechange', handleConnectionChange);
+            'iceconnectionstatechange', event => {console.log('ICE state change event: ', event)});
         remotePeerConnection.addEventListener('addstream', (event) => {
             dispatch(saveRemoteStream(event.stream));
         });
@@ -78,10 +79,12 @@ export function beginCallSetup() {
         const localStream = getState().conference.localStream;
         localPeerConnection.addStream(localStream);
 
-        localPeerConnection.createOffer({ offerToReceiveVideo: 1 })
-            .then(createdOffer.bind(null, localPeerConnection, remotePeerConnection)).catch((error) => {
+        try {
+            const localDescription = await localPeerConnection.createOffer({ offerToReceiveVideo: 1 });
+            await setLocalDescription(localPeerConnection, remotePeerConnection, localDescription);
+        } catch (error) {
             console.log('Error creating offer: ', error.toString());
-        });
+        }
     };
 }
 
